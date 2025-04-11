@@ -2,12 +2,14 @@ import { Link } from "react-router-dom";
 
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaPencil } from "react-icons/fa6";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import StatusComponent from "../components/StatusComponent";
 import BarChart from "../components/BarChart";
 import PieChart from "../components/PieChart";
+import { getAllSpecifics } from "../redux/apiCalls/SpecificApiCall";
+import { useDispatch, useSelector } from "react-redux";
 
 const style = {
   transition: "border-color .15s ease-in-out, box-shadow .15s ease-in-out",
@@ -21,97 +23,38 @@ const shadow = {
 const SpecificsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isFocused, setIsFocused] = useState(false);
+  const dispatch = useDispatch();
 
+  // Fetch patients from Redux store
+  const { specifics, documentCount } = useSelector((state) => state.specific);
+  console.log(specifics);
+
+  // Fetch data with pagination and search
+  useEffect(() => {
+    dispatch(
+      getAllSpecifics({
+        page: currentPage,
+        perPage: itemsPerPage,
+        search: searchTerm,
+      })
+    );
+  }, [dispatch, currentPage, itemsPerPage, searchTerm]);
+
+  // Handle items per page change
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Reset to page 1
+  };
+
+  // Focus style for search input
   const focusStyle = isFocused
     ? {
         borderColor: "#80bdff",
         boxShadow: "0 0 0 .2rem rgba(0, 123, 255, .25)",
       }
     : {};
-
-  const patients = [
-    {
-      name: "Angelica",
-      address: "Linden Avenue, Orlando",
-      disease: "Liver Disease",
-      age: 24,
-      phone: "123-456-7890",
-      email: "angelica@example.com",
-    },
-    {
-      name: "Bradley",
-      address: "Victory Garden, Tallahassee",
-      disease: "Infection",
-      age: 29,
-      phone: "234-567-8901",
-      email: "bradley@example.com",
-    },
-    {
-      name: "Brewden",
-      address: "New Haven, Columbia",
-      disease: "Infection",
-      age: 32,
-      phone: "345-678-9012",
-      email: "brewden@example.com",
-    },
-    {
-      name: "Del Ros",
-      address: "Victory Garden, Vero Beach",
-      disease: "Liver Disease",
-      age: 45,
-      phone: "456-789-0123",
-      email: "delros@example.com",
-    },
-    {
-      name: "Fiona",
-      address: "LA, West Palm Beach",
-      disease: "Heart Disease",
-      age: 28,
-      phone: "567-890-1234",
-      email: "fiona@example.com",
-    },
-    {
-      name: "Gavin",
-      address: "LA, LA, Vero Beach",
-      disease: "Diabetes",
-      age: 36,
-      phone: "678-901-2345",
-      email: "gavin@example.com",
-    },
-    {
-      name: "Goria",
-      address: "Victory Garden, Orlando",
-      disease: "Liver Disease",
-      age: 29,
-      phone: "789-012-3456",
-      email: "goria@example.com",
-    },
-    {
-      name: "Janetta",
-      address: "Birch Street, El Paso",
-      disease: "Autoimmune",
-      age: 34,
-      phone: "890-123-4567",
-      email: "janetta@example.com",
-    },
-    // Add more patient data as needed
-  ];
-
-  const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPatients = filteredPatients.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
 
   return (
     <div>
@@ -153,22 +96,29 @@ const SpecificsPage = () => {
         <div className="flex justify-between items-center mb-4 p-6 pb-0">
           <div>
             <span>Show </span>
-            <select className="border rounded ml-2 outline-0">
-              <option>10</option>
-              <option>20</option>
-              <option>30</option>
+            <select
+              className="border rounded ml-2 outline-0"
+              value={itemsPerPage}
+              onChange={handleItemsPerPageChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
             </select>
           </div>
-          {/* padding: 11px 14px; */}
           <input
             type="text"
             placeholder="Search Data..."
-            className=" rounded-[25px] outline-0 border border-[#0000001a] pl-[11px] pr-[11px]"
+            className="rounded-[25px] outline-0 border border-[#0000001a] pl-[11px] pr-[11px]"
             value={searchTerm}
             style={{ ...style, ...focusStyle }}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset to page 1 on search
+            }}
           />
         </div>
 
@@ -182,7 +132,7 @@ const SpecificsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {currentPatients?.map((patient, index) => (
+              {specifics?.map((specific, index) => (
                 <tr
                   key={index}
                   className={
@@ -190,10 +140,13 @@ const SpecificsPage = () => {
                   }
                 >
                   <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                    {patient.name}
+                    {specific.name}
                   </td>
                   <td className="p-[0.75rem]  border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                    <StatusComponent title={patient.address} isActive={false} />
+                    <StatusComponent
+                      title={specific.isAvailable ? "Active" : "Not Active"}
+                      isActive={specific.isAvailable}
+                    />
                   </td>
 
                   <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6] text-[#212529] ">
@@ -213,11 +166,17 @@ const SpecificsPage = () => {
         <div className="flex justify-between items-center mt-4 p-[24px]">
           <div>
             <span>
-              Page {currentPage} of {totalPages}
+              Page {currentPage} of {Math.ceil(documentCount / itemsPerPage)}
             </span>
           </div>
           <Stack spacing={2}>
-            <Pagination count={10} variant="outlined" shape="rounded" />
+            <Pagination
+              count={Math.ceil(documentCount / itemsPerPage)}
+              page={currentPage}
+              variant="outlined"
+              shape="rounded"
+              onChange={(_, page) => setCurrentPage(page)}
+            />
           </Stack>
         </div>
       </div>
