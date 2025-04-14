@@ -27,11 +27,8 @@ const SpecificsPage = () => {
   const [isFocused, setIsFocused] = useState(false);
   const dispatch = useDispatch();
 
-  // Fetch patients from Redux store
   const { specifics, documentCount } = useSelector((state) => state.specific);
-  console.log(specifics);
 
-  // Fetch data with pagination and search
   useEffect(() => {
     dispatch(
       getAllSpecifics({

@@ -2,9 +2,12 @@ import { Link } from "react-router-dom";
 
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaPencil } from "react-icons/fa6";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllProducts } from "../redux/apiCalls/productApiCall";
+import { baseUrl } from "../utils/request";
 
 const style = {
   transition: "border-color .15s ease-in-out, box-shadow .15s ease-in-out",
@@ -14,77 +17,37 @@ const style = {
 const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isFocused, setIsFocused] = useState(false);
+  const dispatch = useDispatch();
 
+  // Fetch products from Redux store
+  const { products, documentCount } = useSelector((state) => state.product);
+
+  // Fetch data with pagination and search
+  useEffect(() => {
+    dispatch(
+      getAllProducts({
+        page: currentPage,
+        perPage: itemsPerPage,
+        search: searchTerm,
+      })
+    );
+  }, [dispatch, currentPage, itemsPerPage, searchTerm]);
+
+  // Handle items per page change
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Reset to page 1
+  };
+
+  // Focus style for search input
   const focusStyle = isFocused
     ? {
         borderColor: "#80bdff",
         boxShadow: "0 0 0 .2rem rgba(0, 123, 255, .25)",
       }
     : {};
-
-  const patients = [
-    {
-      image: "",
-      name: "Angelica",
-      pharmacyName: "Linden Avenue",
-      oldPrice: 45,
-      price: 24,
-      description: "description description description",
-      capacity: "2ml",
-    },
-    {
-      image: "",
-      name: "Angelica",
-      pharmacyName: "Linden Avenue",
-      oldPrice: 45,
-      price: 24,
-      description: "description description description",
-      capacity: "2ml",
-    },
-    {
-      image: "",
-      name: "Angelica",
-      pharmacyName: "Linden Avenue",
-      oldPrice: 45,
-      price: 24,
-      description: "description description description",
-      capacity: "2ml",
-    },
-    {
-      image: "",
-      name: "Angelica",
-      pharmacyName: "Linden Avenue",
-      oldPrice: 45,
-      price: 24,
-      description: "description description description",
-      capacity: "2ml",
-    },
-    {
-      image: "",
-      name: "Angelica",
-      pharmacyName: "Linden Avenue",
-      oldPrice: 45,
-      price: 24,
-      description: "description description description",
-      capacity: "2ml",
-    },
-  ];
-
-  const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPatients = filteredPatients.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
 
   return (
     <div className=" bg-white rounded-lg shadow">
@@ -100,22 +63,29 @@ const ProductsPage = () => {
       <div className="flex justify-between items-center mb-4 p-6 pb-0">
         <div>
           <span>Show </span>
-          <select className="border rounded ml-2 outline-0">
-            <option>10</option>
-            <option>20</option>
-            <option>30</option>
+          <select
+            className="border rounded ml-2 outline-0"
+            value={itemsPerPage}
+            onChange={handleItemsPerPageChange}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={30}>30</option>
           </select>
         </div>
-        {/* padding: 11px 14px; */}
         <input
           type="text"
           placeholder="Search Data..."
-          className=" rounded-[25px] outline-0 border border-[#0000001a] pl-[11px] pr-[11px]"
+          className="rounded-[25px] outline-0 border border-[#0000001a] pl-[11px] pr-[11px]"
           value={searchTerm}
           style={{ ...style, ...focusStyle }}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset to page 1 on search
+          }}
         />
       </div>
 
@@ -134,7 +104,7 @@ const ProductsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {currentPatients?.map((patient, index) => (
+            {products?.map((product, index) => (
               <tr
                 key={index}
                 className={
@@ -142,25 +112,29 @@ const ProductsPage = () => {
                 }
               >
                 <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                  {patient.image}
+                  <img
+                    src={baseUrl + product.image}
+                    alt=""
+                    className="w-[80px] h-[80px] bg-cover rounded-full"
+                  />
                 </td>
                 <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                  {patient.name}
+                  {product.name}
                 </td>
                 <td className="p-[0.75rem]  border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                  {patient.pharmacyName}
+                  {product.pharmacy.name}
                 </td>
                 <td className="p-[0.75rem]  border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                  {patient.oldPrice}
+                  {product.oldPrice}
                 </td>
                 <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                  {patient.price}
+                  {product.price}
                 </td>
                 <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                  {patient.description}
+                  {product.description}
                 </td>
                 <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6]  text-[#212529]">
-                  {patient.capacity}
+                  {product.capacity}
                 </td>
                 <td className="p-[0.75rem] border border-l-0 border-r-0 border-b-0 border-t-[#dee2e6] text-[#212529] ">
                   <button className="text-blue-500 cursor-pointer">
@@ -179,11 +153,17 @@ const ProductsPage = () => {
       <div className="flex justify-between items-center mt-4 p-[24px]">
         <div>
           <span>
-            Page {currentPage} of {totalPages}
+            Page {currentPage} of {Math.ceil(documentCount / itemsPerPage)}
           </span>
         </div>
         <Stack spacing={2}>
-          <Pagination count={10} variant="outlined" shape="rounded" />
+          <Pagination
+            count={Math.ceil(documentCount / itemsPerPage)}
+            page={currentPage}
+            variant="outlined"
+            shape="rounded"
+            onChange={(_, page) => setCurrentPage(page)}
+          />
         </Stack>
       </div>
     </div>

@@ -1,14 +1,14 @@
 import { toast } from "react-toastify";
-import { patientAction } from "../slices/patientSlice";
+import { productAction } from "../slices/productSlice";
 import { request } from "../../utils/request";
 import { getIdCookie } from "../../utils/cookies";
 const user = getIdCookie();
-export const getAllPatients = (query) => {
+export const getAllProducts = (query) => {
   return async (dispatch) => {
-    dispatch(patientAction.setLoading());
+    dispatch(productAction.setLoading());
     try {
       // Construct the base URL without search if searchTerm is empty/null
-      let url = `/users?page=${query.page}&perPage=${query.perPage}`;
+      let url = `/products?page=${query.page}&perPage=${query.perPage}`;
 
       // Add search term only if it exists
       if (query.search) {
@@ -20,15 +20,14 @@ export const getAllPatients = (query) => {
           Authorization: `Bearer ${user.token}`,
         },
       });
-      console.log(data);
 
-      dispatch(patientAction.setPatients(data.users));
-      dispatch(patientAction.setDocumentCount(data.documentCount));
+      dispatch(productAction.setProducts(data.products));
+      dispatch(productAction.setDocumentCount(data.documentCount));
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data?.message || "Failed to fetch patients");
+      toast.error(error.response.data?.message || "Failed to fetch products");
     } finally {
-      dispatch(patientAction.setLoading());
+      dispatch(productAction.setLoading());
     }
   };
 };
