@@ -26,3 +26,28 @@ export const getAllDoctors = (query) => {
     }
   };
 };
+
+export const addDoctor = (formData, navigate) => {
+  return async (dispatch) => {
+    dispatch(doctorAction.setLoading());
+    try {
+      const { data } = await request.post(`/auth/register`, formData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(data);
+
+      toast.success("Doctor Added successfully");
+      navigate("/doctors/list");
+      // dispatch(doctorAction.setDoctors(data.users));
+      // dispatch(doctorAction.setDocumentCount(data.documentCount));
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data?.message);
+    } finally {
+      dispatch(doctorAction.setLoading());
+    }
+  };
+};

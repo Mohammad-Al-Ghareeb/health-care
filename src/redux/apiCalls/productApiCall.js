@@ -31,3 +31,31 @@ export const getAllProducts = (query) => {
     }
   };
 };
+
+export const createProduct = (formData, navigate) => {
+  return async (dispatch) => {
+    for (const [key, value] of Object.entries(formData)) {
+      if (key === "image" && value) {
+        console.log("image", value); // Append image file
+      } else {
+        console.log(key, value); // Append other form values
+      }
+    }
+    dispatch(productAction.setLoading());
+    try {
+      await request.post(`/products`, formData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("Product Added successfully");
+      navigate("/products/list");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data?.message);
+    } finally {
+      dispatch(productAction.setLoading());
+    }
+  };
+};

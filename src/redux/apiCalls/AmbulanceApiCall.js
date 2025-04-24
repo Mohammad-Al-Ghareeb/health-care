@@ -31,3 +31,24 @@ export const getAllAmbulances = (query) => {
     }
   };
 };
+
+export const addAmbulance = (formData, navigate) => {
+  return async (dispatch) => {
+    dispatch(ambulanceAction.setLoading());
+    try {
+      await request.post(`/ambulances`, formData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("Ambulances Added successfully");
+      navigate("/ambulances/list");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data?.message);
+    } finally {
+      dispatch(ambulanceAction.setLoading());
+    }
+  };
+};

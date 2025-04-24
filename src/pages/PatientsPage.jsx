@@ -44,6 +44,8 @@ const PatientsList = () => {
     (state) => state.patient
   );
 
+  console.log(patients);
+
   // Fetch data with pagination and search
   useEffect(() => {
     dispatch(

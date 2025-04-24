@@ -29,3 +29,24 @@ export const getAllSpecifics = (query) => {
     }
   };
 };
+
+export const addSpecific = (formData, navigate) => {
+  return async (dispatch) => {
+    dispatch(specificAction.setLoading());
+    try {
+      await request.post(`/specifics`, formData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          // "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("Specifics Added successfully");
+      navigate("/specifics/list");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data?.message);
+    } finally {
+      dispatch(specificAction.setLoading());
+    }
+  };
+};

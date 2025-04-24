@@ -1,10 +1,10 @@
 import React, { useRef } from "react";
 
-const ImageUpload = ({ name }) => {
+const ImageUpload = ({ name, onChange }) => {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
-    const fileName = event.target.files[0]?.name || "Choose file...";
+    const fileName = event.target.files[0] || "Choose file...";
     fileInputRef.current.value = fileName;
   };
 
@@ -22,6 +22,7 @@ const ImageUpload = ({ name }) => {
           type="file"
           ref={fileInputRef}
           //   readOnly
+          onChange={onChange}
           placeholder="Choose file..."
           className="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none"
         />

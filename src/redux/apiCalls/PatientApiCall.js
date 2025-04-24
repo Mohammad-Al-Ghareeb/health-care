@@ -32,3 +32,24 @@ export const getAllPatients = (query) => {
     }
   };
 };
+
+export const addPatient = (formData, navigate) => {
+  return async (dispatch) => {
+    dispatch(patientAction.setLoading());
+    try {
+      await request.post(`/auth/register`, formData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("Patient Added successfully");
+      navigate("/patients/list");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data?.message);
+    } finally {
+      dispatch(patientAction.setLoading());
+    }
+  };
+};

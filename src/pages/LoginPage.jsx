@@ -33,7 +33,10 @@ const LoginPage = () => {
         </div>
 
         <InputComponent
-          fun={setEmail}
+          onChange={(e) => {
+            // console.log(e.target.value);
+            setEmail(e.target.value);
+          }}
           label={"Email"}
           placeholder={"Enter Email"}
           name={"email"}
@@ -41,7 +44,9 @@ const LoginPage = () => {
           margin={true}
         />
         <InputComponent
-          fun={setPassword}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
           label={"Password"}
           placeholder={"Enter Password"}
           name={"password"}

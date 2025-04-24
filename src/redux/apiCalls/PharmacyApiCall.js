@@ -29,3 +29,24 @@ export const getAllPharmacies = (query) => {
     }
   };
 };
+
+export const addPharmacy = (formData, navigate) => {
+  return async (dispatch) => {
+    dispatch(pharmacyAction.setLoading());
+    try {
+      await request.post(`/pharmacies`, formData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("pharmacies Added successfully");
+      navigate("/pharmacies/list");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data?.message);
+    } finally {
+      dispatch(pharmacyAction.setLoading());
+    }
+  };
+};
